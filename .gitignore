@@ -45,3 +45,7 @@ go.work.sum
 
 # env
 .env
+
+
+# tmp
+configs/config.yaml
