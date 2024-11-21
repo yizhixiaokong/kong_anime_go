@@ -1,0 +1,47 @@
+
+# MacOS
+.DS_Store
+
+# JetBrains
+.idea
+
+# Visual Code
+.vscode/*
+
+# Local History for Visual Studio Code
+.history/
+
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Sqlite
+*.db
+*.db-journal
+
+# Logs
+/log
+*.log
+
+# Build
+kong_anime_go
+backend
+
+# pyc
+*.pyc
+
+# gowork
+go.work
+go.work.sum
+
+# env
+.env
