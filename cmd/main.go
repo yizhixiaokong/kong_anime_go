@@ -15,9 +15,9 @@ import (
 )
 
 func main() {
-	config.InitConfig()        // 初始化配置
-	dao.InitDB()               // 初始化数据库连接
-	r := routers.SetupRouter() // 初始化路由
+	config.InitConfig()          // 初始化配置
+	db := dao.InitDB()           // 初始化数据库连接
+	r := routers.SetupRouter(db) // 初始化路由
 	srv := &http.Server{
 		Addr:    ":8080",
 		Handler: r,

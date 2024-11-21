@@ -37,3 +37,22 @@ func (dao *TagDAO) Update(tag *models.Tag) error {
 func (dao *TagDAO) Delete(id uint) error {
 	return dao.db.Delete(&models.Tag{}, id).Error
 }
+
+func (dao *TagDAO) GetByName(name string) (*models.Tag, error) {
+	var tag models.Tag
+	err := dao.db.Where("name = ?", name).First(&tag).Error
+	return &tag, err
+}
+
+func (dao *TagDAO) CheckRelatedItems(id uint) (bool, error) {
+	var animeCount, movieCount int64
+	err := dao.db.Model(&models.Anime{}).Where("id IN (SELECT anime_id FROM anime_tags WHERE tag_id = ?)", id).Count(&animeCount).Error
+	if err != nil {
+		return false, err
+	}
+	err = dao.db.Model(&models.Movie{}).Where("id IN (SELECT movie_id FROM movie_tags WHERE tag_id = ?)", id).Count(&movieCount).Error
+	if err != nil {
+		return false, err
+	}
+	return animeCount > 0 || movieCount > 0, nil
+}

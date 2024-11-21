@@ -37,3 +37,22 @@ func (dao *CategoryDAO) Update(category *models.Category) error {
 func (dao *CategoryDAO) Delete(id uint) error {
 	return dao.db.Delete(&models.Category{}, id).Error
 }
+
+func (dao *CategoryDAO) GetByName(name string) (*models.Category, error) {
+	var category models.Category
+	err := dao.db.Where("name = ?", name).First(&category).Error
+	return &category, err
+}
+
+func (dao *CategoryDAO) CheckRelatedItems(id uint) (bool, error) {
+	var animeCount, movieCount int64
+	err := dao.db.Model(&models.Anime{}).Where("id IN (SELECT anime_id FROM anime_categories WHERE category_id = ?)", id).Count(&animeCount).Error
+	if err != nil {
+		return false, err
+	}
+	err = dao.db.Model(&models.Movie{}).Where("id IN (SELECT movie_id FROM movie_categories WHERE category_id = ?)", id).Count(&movieCount).Error
+	if err != nil {
+		return false, err
+	}
+	return animeCount > 0 || movieCount > 0, nil
+}

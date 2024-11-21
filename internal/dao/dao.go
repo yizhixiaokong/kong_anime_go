@@ -12,7 +12,7 @@ import (
 
 var DB *gorm.DB
 
-func InitDB() {
+func InitDB() *gorm.DB {
 	dbConfig := config.DBConfig
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=%s&parseTime=True&loc=Local",
 		dbConfig.User, dbConfig.Password, dbConfig.Host, dbConfig.Port, dbConfig.DBName, dbConfig.Charset)
@@ -28,4 +28,6 @@ func InitDB() {
 	}
 
 	fmt.Println("Database connection and migration successful.")
+
+	return DB
 }
