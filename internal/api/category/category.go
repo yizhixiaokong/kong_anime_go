@@ -30,7 +30,7 @@ func (h *CategoryHandler) CreateCategory(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusCreated, category)
+	c.JSON(http.StatusOK, category)
 }
 
 func (h *CategoryHandler) DeleteCategory(c *gin.Context) {

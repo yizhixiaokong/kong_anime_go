@@ -30,7 +30,7 @@ func (h *TagHandler) CreateTag(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusCreated, tag)
+	c.JSON(http.StatusOK, tag)
 }
 
 func (h *TagHandler) DeleteTag(c *gin.Context) {
