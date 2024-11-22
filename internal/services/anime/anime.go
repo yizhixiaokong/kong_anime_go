@@ -21,29 +21,16 @@ func NewAnimeService(animeDAO *dao.AnimeDAO, categoryDAO *dao.CategoryDAO, tagDA
 }
 
 func (s *AnimeService) CreateAnime(anime *models.Anime, categories []string, tags []string) (*models.Anime, error) {
-	for _, categoryName := range categories {
-		category, err := s.categoryDAO.GetByName(categoryName)
-		if err != nil {
-			category = &models.Category{Name: categoryName}
-			if err := s.categoryDAO.Create(category); err != nil {
-				return nil, err
-			}
-		}
-		anime.Categories = append(anime.Categories, *category)
+	if err := s.animeDAO.Create(anime); err != nil {
+		return nil, err
 	}
-
-	for _, tagName := range tags {
-		tag, err := s.tagDAO.GetByName(tagName)
-		if err != nil {
-			tag = &models.Tag{Name: tagName}
-			if err := s.tagDAO.Create(tag); err != nil {
-				return nil, err
-			}
-		}
-		anime.Tags = append(anime.Tags, *tag)
+	if err := s.addCategoriesToAnime(anime, categories); err != nil {
+		return nil, err
 	}
-
-	return anime, s.animeDAO.Create(anime)
+	if err := s.addTagsToAnime(anime, tags); err != nil {
+		return nil, err
+	}
+	return s.animeDAO.GetByID(anime.ID)
 }
 
 func (s *AnimeService) DeleteAnime(id uint) (uint, error) {
@@ -59,32 +46,83 @@ func (s *AnimeService) UpdateAnime(anime *models.Anime, categories []string, tag
 		return nil, errors.New("anime not found")
 	}
 
-	anime.Categories = nil
-	anime.Tags = nil
+	existingAnime.Name = anime.Name
+	existingAnime.Aliases = anime.Aliases
+	existingAnime.Production = anime.Production
+	existingAnime.Season = anime.Season
+	existingAnime.Episodes = anime.Episodes
+	existingAnime.Image = anime.Image
 
+	if err := s.updateCategories(existingAnime, categories); err != nil {
+		return nil, err
+	}
+	if err := s.updateTags(existingAnime, tags); err != nil {
+		return nil, err
+	}
+
+	return s.animeDAO.GetByID(existingAnime.ID)
+}
+
+func (s *AnimeService) updateCategories(anime *models.Anime, categories []string) error {
+	if err := s.animeDAO.ClearCategories(anime.ID); err != nil {
+		return err
+	}
+	return s.addCategoriesToAnime(anime, categories)
+}
+
+func (s *AnimeService) updateTags(anime *models.Anime, tags []string) error {
+	if err := s.animeDAO.ClearTags(anime.ID); err != nil {
+		return err
+	}
+	return s.addTagsToAnime(anime, tags)
+}
+
+func (s *AnimeService) addCategoriesToAnime(anime *models.Anime, categories []string) error {
 	for _, categoryName := range categories {
-		category, err := s.categoryDAO.GetByName(categoryName)
+		category, err := s.getOrCreateCategory(categoryName)
 		if err != nil {
-			category = &models.Category{Name: categoryName}
-			if err := s.categoryDAO.Create(category); err != nil {
-				return nil, err
-			}
+			return err
 		}
-		anime.Categories = append(anime.Categories, *category)
+		if err := s.animeDAO.AddCategory(anime.ID, category.ID); err != nil {
+			return err
+		}
 	}
+	return nil
+}
 
+func (s *AnimeService) addTagsToAnime(anime *models.Anime, tags []string) error {
 	for _, tagName := range tags {
-		tag, err := s.tagDAO.GetByName(tagName)
+		tag, err := s.getOrCreateTag(tagName)
 		if err != nil {
-			tag = &models.Tag{Name: tagName}
-			if err := s.tagDAO.Create(tag); err != nil {
-				return nil, err
-			}
+			return err
 		}
-		anime.Tags = append(anime.Tags, *tag)
+		if err := s.animeDAO.AddTag(anime.ID, tag.ID); err != nil {
+			return err
+		}
 	}
+	return nil
+}
 
-	return anime, s.animeDAO.Update(anime)
+func (s *AnimeService) getOrCreateCategory(name string) (*models.Category, error) {
+	category, err := s.categoryDAO.GetByName(name)
+	if err != nil {
+		category = &models.Category{Name: name}
+		if err := s.categoryDAO.Create(category); err != nil {
+			return nil, err
+		}
+	}
+	return category, nil
+}
+
+func (s *AnimeService) getOrCreateTag(name string) (*models.Tag, error) {
+	tag, err := s.tagDAO.GetByName(name)
+	if err != nil {
+		tag = &models.Tag{Name: name}
+		if err := s.tagDAO.Create(tag); err != nil {
+			return nil, err
+		}
+	}
+	return tag, nil
 }
 
 func (s *AnimeService) GetAnimeByID(id uint) (*models.Anime, error) {
@@ -116,29 +154,10 @@ func (s *AnimeService) AddCategoriesToAnime(animeID uint, categories []string) (
 	if err != nil {
 		return nil, err
 	}
-
-	for _, categoryName := range categories {
-		category, err := s.categoryDAO.GetByName(categoryName)
-		if err != nil {
-			category = &models.Category{Name: categoryName}
-			if err := s.categoryDAO.Create(category); err != nil {
-				return nil, err
-			}
-		}
-		// Check if category already exists in anime
-		exists := false
-		for _, c := range anime.Categories {
-			if c.ID == category.ID {
-				exists = true
-				break
-			}
-		}
-		if !exists {
-			anime.Categories = append(anime.Categories, *category)
-		}
+	if err := s.updateCategories(anime, categories); err != nil {
+		return nil, err
 	}
-
-	return anime, s.animeDAO.Update(anime)
+	return s.animeDAO.GetByID(anime.ID)
 }
 
 func (s *AnimeService) AddTagsToAnime(animeID uint, tags []string) (*models.Anime, error) {
@@ -146,27 +165,8 @@ func (s *AnimeService) AddTagsToAnime(animeID uint, tags []string) (*models.Anim
 	if err != nil {
 		return nil, err
 	}
-
-	for _, tagName := range tags {
-		tag, err := s.tagDAO.GetByName(tagName)
-		if err != nil {
-			tag = &models.Tag{Name: tagName}
-			if err := s.tagDAO.Create(tag); err != nil {
-				return nil, err
-			}
-		}
-		// Check if tag already exists in anime
-		exists := false
-		for _, t := range anime.Tags {
-			if t.ID == tag.ID {
-				exists = true
-				break
-			}
-		}
-		if !exists {
-			anime.Tags = append(anime.Tags, *tag)
-		}
+	if err := s.updateTags(anime, tags); err != nil {
+		return nil, err
 	}
-
-	return anime, s.animeDAO.Update(anime)
+	return s.animeDAO.GetByID(anime.ID)
 }
