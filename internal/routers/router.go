@@ -59,6 +59,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 		v1.GET("/animes/tag", animeHandler.GetAnimesByTag)
 		v1.PATCH("/animes/:id/categories", animeHandler.AddCategoriesToAnime)
 		v1.PATCH("/animes/:id/tags", animeHandler.AddTagsToAnime)
+		v1.GET("/animes/seasons", animeHandler.GetAllSeasons)
 
 		// Category
 		v1.POST("/categories", categoryHandler.CreateCategory)
@@ -66,6 +67,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 		v1.PUT("/categories/:id", categoryHandler.UpdateCategory)
 		v1.GET("/categories/:id", categoryHandler.GetCategoryByID)
 		v1.GET("/categories", categoryHandler.GetAllCategories)
+		v1.GET("/categories/search", categoryHandler.GetCategoriesByName)
 
 		// Tag
 		v1.POST("/tags", tagHandler.CreateTag)
@@ -73,6 +75,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 		v1.PUT("/tags/:id", tagHandler.UpdateTag)
 		v1.GET("/tags/:id", tagHandler.GetTagByID)
 		v1.GET("/tags", tagHandler.GetAllTags)
+		v1.GET("/tags/search", tagHandler.GetTagsByName)
 	}
 
 	return router

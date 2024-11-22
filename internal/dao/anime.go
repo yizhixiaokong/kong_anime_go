@@ -84,6 +84,21 @@ func (dao *AnimeDAO) AddTag(animeID, tagID uint) error {
 	return dao.db.Model(&a).Association("Tags").Append(&tag)
 }
 
+type SeasonCount struct {
+	Season string
+	Count  int
+}
+
+func (dao *AnimeDAO) GetAllSeasons() ([]SeasonCount, error) {
+	var seasons []SeasonCount
+	err := dao.db.Model(&models.Anime{}).
+		Select("season, COUNT(*) as count").
+		Group("season").
+		Order("season").
+		Scan(&seasons).Error
+	return seasons, err
+}
+
 func (dao *AnimeDAO) getByCondition(condition string, args interface{}, page, pageSize int) ([]models.Anime, int64, error) {
 	var animes []models.Anime
 	var total int64

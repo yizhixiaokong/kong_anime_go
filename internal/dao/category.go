@@ -44,6 +44,12 @@ func (dao *CategoryDAO) GetByName(name string) (*models.Category, error) {
 	return &category, err
 }
 
+func (dao *CategoryDAO) GetByNameLike(name string) ([]models.Category, error) {
+	var categories []models.Category
+	err := dao.db.Where("name LIKE ?", "%"+name+"%").Find(&categories).Error
+	return categories, err
+}
+
 func (dao *CategoryDAO) CheckRelatedItems(id uint) (bool, error) {
 	var animeCount, movieCount int64
 	err := dao.db.Model(&models.Anime{}).Where("id IN (SELECT anime_id FROM anime_categories WHERE category_id = ?)", id).Count(&animeCount).Error

@@ -254,3 +254,13 @@ func (api *Handler) AddTagsToAnime(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"msg": "Tags added successfully!", "anime": anime})
 }
+
+func (api *Handler) GetAllSeasons(c *gin.Context) {
+	seasons, err := api.AnimeSrv.GetAllSeasons()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"seasons": seasons})
+}

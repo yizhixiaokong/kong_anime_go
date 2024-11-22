@@ -4,6 +4,7 @@ import (
 	"errors"
 	"kong-anime-go/internal/dao"
 	"kong-anime-go/internal/dao/models"
+	"strings"
 )
 
 type AnimeService struct {
@@ -169,4 +170,25 @@ func (s *AnimeService) AddTagsToAnime(animeID uint, tags []string) (*models.Anim
 		return nil, err
 	}
 	return s.animeDAO.GetByID(anime.ID)
+}
+
+func (s *AnimeService) GetAllSeasons() (map[string]map[string]int, error) {
+	seasons, err := s.animeDAO.GetAllSeasons()
+	if err != nil {
+		return nil, err
+	}
+
+	seasonMap := make(map[string]map[string]int)
+	for _, season := range seasons {
+		parts := strings.Split(season.Season, "-")
+		if len(parts) == 2 {
+			year := parts[0]
+			month := parts[1]
+			if seasonMap[year] == nil {
+				seasonMap[year] = make(map[string]int)
+			}
+			seasonMap[year][month] = season.Count
+		}
+	}
+	return seasonMap, nil
 }

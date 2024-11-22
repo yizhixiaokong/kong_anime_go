@@ -44,6 +44,12 @@ func (dao *TagDAO) GetByName(name string) (*models.Tag, error) {
 	return &tag, err
 }
 
+func (dao *TagDAO) GetByNameLike(name string) ([]models.Tag, error) {
+	var tags []models.Tag
+	err := dao.db.Where("name LIKE ?", "%"+name+"%").Find(&tags).Error
+	return tags, err
+}
+
 func (dao *TagDAO) CheckRelatedItems(id uint) (bool, error) {
 	var animeCount, movieCount int64
 	err := dao.db.Model(&models.Anime{}).Where("id IN (SELECT anime_id FROM anime_tags WHERE tag_id = ?)", id).Count(&animeCount).Error
