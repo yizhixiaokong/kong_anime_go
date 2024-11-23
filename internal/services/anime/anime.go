@@ -61,6 +61,10 @@ func (s *AnimeService) UpdateAnime(anime *models.Anime, categories []string, tag
 		return nil, err
 	}
 
+	if err := s.animeDAO.Update(existingAnime); err != nil {
+		return nil, err
+	}
+
 	return s.animeDAO.GetByID(existingAnime.ID)
 }
 
