@@ -35,7 +35,14 @@ func (s *AnimeService) CreateAnime(anime *models.Anime, categories []string, tag
 }
 
 func (s *AnimeService) DeleteAnime(id uint) (uint, error) {
-	return id, s.animeDAO.Delete(id)
+	if err := s.animeDAO.ClearCategories(id); err != nil {
+		return 0, err
+	}
+	if err := s.animeDAO.ClearTags(id); err != nil {
+		return 0, err
+	}
+	// 硬删除
+	return id, s.animeDAO.HardDelete(id)
 }
 
 func (s *AnimeService) UpdateAnime(anime *models.Anime, categories []string, tags []string) (*models.Anime, error) {

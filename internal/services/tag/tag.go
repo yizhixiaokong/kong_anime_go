@@ -36,7 +36,8 @@ func (s *TagService) DeleteTag(id uint) (uint, error) {
 	if relatedItems {
 		return 0, errors.New("cannot delete tag with related items")
 	}
-	if err := s.tagDAO.Delete(id); err != nil {
+	// 硬删除
+	if err := s.tagDAO.HardDelete(id); err != nil {
 		return 0, err
 	}
 	return id, nil

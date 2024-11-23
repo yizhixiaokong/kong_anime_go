@@ -36,7 +36,8 @@ func (s *CategoryService) DeleteCategory(id uint) (uint, error) {
 	if relatedItems {
 		return 0, errors.New("cannot delete category with related items")
 	}
-	if err := s.categoryDAO.Delete(id); err != nil {
+	// 硬删除
+	if err := s.categoryDAO.HardDelete(id); err != nil {
 		return 0, err
 	}
 	return id, nil

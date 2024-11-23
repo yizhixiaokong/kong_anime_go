@@ -10,8 +10,10 @@ import (
 	"kong-anime-go/internal/config"
 )
 
+// DB 数据库连接
 var DB *gorm.DB
 
+// InitDB 初始化数据库连接
 func InitDB() *gorm.DB {
 	dbConfig := config.DBConfig
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=%s&parseTime=True&loc=Local",
