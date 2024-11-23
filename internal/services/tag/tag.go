@@ -73,3 +73,7 @@ func (s *TagService) GetAllTags() ([]models.Tag, error) {
 func (s *TagService) GetTagsByName(name string) ([]models.Tag, error) {
 	return s.tagDAO.GetByNameLike(name)
 }
+
+func (s *TagService) GetTagStats() (map[string]int, error) {
+	return s.tagDAO.GetTagStats()
+}

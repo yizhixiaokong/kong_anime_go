@@ -87,3 +87,12 @@ func (h *TagHandler) GetTagsByName(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"tags": tags, "total": len(tags)})
 }
+
+func (h *TagHandler) GetTagStats(c *gin.Context) {
+	stats, err := h.tagService.GetTagStats()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"tag_stats": stats})
+}

@@ -87,3 +87,12 @@ func (h *CategoryHandler) GetCategoriesByName(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"categories": categories, "total": len(categories)})
 }
+
+func (h *CategoryHandler) GetCategoryStats(c *gin.Context) {
+	stats, err := h.categoryService.GetCategoryStats()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"category_stats": stats})
+}

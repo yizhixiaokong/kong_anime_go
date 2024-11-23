@@ -62,3 +62,24 @@ func (dao *TagDAO) CheckRelatedItems(id uint) (bool, error) {
 	}
 	return animeCount > 0 || movieCount > 0, nil
 }
+
+func (dao *TagDAO) GetTagStats() (map[string]int, error) {
+	var results []struct {
+		Name  string
+		Count int
+	}
+	err := dao.db.Table("tags").
+		Select("tags.name as name, COUNT(anime_tags.anime_id) as count").
+		Joins("JOIN anime_tags ON anime_tags.tag_id = tags.id").
+		Group("tags.name").
+		Scan(&results).Error
+	if err != nil {
+		return nil, err
+	}
+
+	stats := make(map[string]int)
+	for _, result := range results {
+		stats[result.Name] = result.Count
+	}
+	return stats, nil
+}

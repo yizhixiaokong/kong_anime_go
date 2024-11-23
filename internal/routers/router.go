@@ -68,6 +68,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 		v1.GET("/categories/:id", categoryHandler.GetCategoryByID)
 		v1.GET("/categories", categoryHandler.GetAllCategories)
 		v1.GET("/categories/search", categoryHandler.GetCategoriesByName)
+		v1.GET("/categories/stats", categoryHandler.GetCategoryStats)
 
 		// Tag
 		v1.POST("/tags", tagHandler.CreateTag)
@@ -76,6 +77,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 		v1.GET("/tags/:id", tagHandler.GetTagByID)
 		v1.GET("/tags", tagHandler.GetAllTags)
 		v1.GET("/tags/search", tagHandler.GetTagsByName)
+		v1.GET("/tags/stats", tagHandler.GetTagStats)
 	}
 
 	return router

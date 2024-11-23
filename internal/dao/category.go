@@ -62,3 +62,24 @@ func (dao *CategoryDAO) CheckRelatedItems(id uint) (bool, error) {
 	}
 	return animeCount > 0 || movieCount > 0, nil
 }
+
+func (dao *CategoryDAO) GetCategoryStats() (map[string]int, error) {
+	var results []struct {
+		Name  string
+		Count int
+	}
+	err := dao.db.Table("categories").
+		Select("categories.name as name, COUNT(anime_categories.anime_id) as count").
+		Joins("JOIN anime_categories ON anime_categories.category_id = categories.id").
+		Group("categories.name").
+		Scan(&results).Error
+	if err != nil {
+		return nil, err
+	}
+
+	stats := make(map[string]int)
+	for _, result := range results {
+		stats[result.Name] = result.Count
+	}
+	return stats, nil
+}

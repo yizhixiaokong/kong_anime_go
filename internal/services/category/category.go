@@ -73,3 +73,7 @@ func (s *CategoryService) GetAllCategories() ([]models.Category, error) {
 func (s *CategoryService) GetCategoriesByName(name string) ([]models.Category, error) {
 	return s.categoryDAO.GetByNameLike(name)
 }
+
+func (s *CategoryService) GetCategoryStats() (map[string]int, error) {
+	return s.categoryDAO.GetCategoryStats()
+}
