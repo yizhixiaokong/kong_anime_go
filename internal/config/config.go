@@ -2,7 +2,9 @@ package config
 
 import (
 	"log"
+	"strings"
 
+	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
 )
 
@@ -18,14 +20,23 @@ type DatabaseConfig struct {
 var DBConfig DatabaseConfig
 
 func InitConfig() {
+	// 加载 .env 文件
+	err := godotenv.Load("./configs/.env")
+	if err != nil {
+		// 没读到就忽略，但是log
+		log.Printf("Error loading .env file, %s", err)
+	}
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath("./configs")
 
-	err := viper.ReadInConfig()
+	err = viper.ReadInConfig()
 	if err != nil {
 		log.Fatalf("Error reading config file, %s", err)
 	}
+
+	viper.AutomaticEnv()
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
 	DBConfig = DatabaseConfig{
 		User:     viper.GetString("database.user"),
