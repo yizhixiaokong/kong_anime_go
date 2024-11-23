@@ -45,11 +45,13 @@ func (dao *AnimeDAO) GetAllPaginated(page, pageSize int) ([]models.Anime, int64,
 }
 
 func (dao *AnimeDAO) GetByNameAndAlias(name string, page, pageSize int) ([]models.Anime, int64, error) {
-	return dao.getByCondition("name LIKE ? OR aliases LIKE ?", "%"+name+"%", page, pageSize)
+	condition := "name LIKE ? OR aliases LIKE ?"
+	args := []any{"%" + name + "%", "%" + name + "%"}
+	return dao.getByCondition(condition, args, page, pageSize)
 }
 
 func (dao *AnimeDAO) GetBySeason(season string, page, pageSize int) ([]models.Anime, int64, error) {
-	return dao.getByCondition("season = ?", season, page, pageSize)
+	return dao.getByCondition("season = ?", []any{season}, page, pageSize)
 }
 
 func (dao *AnimeDAO) GetByCategory(categoryName string, page, pageSize int) ([]models.Anime, int64, error) {
@@ -99,16 +101,16 @@ func (dao *AnimeDAO) GetAllSeasons() ([]SeasonCount, error) {
 	return seasons, err
 }
 
-func (dao *AnimeDAO) getByCondition(condition string, args interface{}, page, pageSize int) ([]models.Anime, int64, error) {
+func (dao *AnimeDAO) getByCondition(condition string, args []any, page, pageSize int) ([]models.Anime, int64, error) {
 	var animes []models.Anime
 	var total int64
 	offset := (page - 1) * pageSize
-	err := dao.db.Where(condition, args).
+	err := dao.db.Where(condition, args...).
 		Preload("Categories").Preload("Tags").
 		Order("id DESC").
 		Limit(pageSize).Offset(offset).
 		Find(&animes).Error
-	dao.db.Model(&models.Anime{}).Where(condition, args).Count(&total)
+	dao.db.Model(&models.Anime{}).Where(condition, args...).Count(&total)
 	return animes, total, err
 }
 
