@@ -5,17 +5,21 @@ import (
 	"time"
 )
 
-type PingService struct{}
+// Service 处理 Ping 相关的服务
+type Service struct{}
 
-func NewPingService() *PingService {
-	return &PingService{}
+// NewService 创建一个新的 PingService
+func NewService() *Service {
+	return &Service{}
 }
 
-func (s *PingService) GetHello() string {
+// GetHello 返回一个问候消息
+func (s *Service) GetHello() string {
 	return "Hello, World!"
 }
 
-func (s *PingService) GetPing() (*models.Ping, error) {
+// GetPing 返回一个 Ping 消息
+func (s *Service) GetPing() (*models.Ping, error) {
 	return &models.Ping{
 		Msg:  "pong",
 		Time: time.Now().Format(time.DateTime),

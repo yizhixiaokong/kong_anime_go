@@ -6,17 +6,20 @@ import (
 	"kong-anime-go/internal/dao/models"
 )
 
-type TagService struct {
+// Service 处理标签相关的服务
+type Service struct {
 	tagDAO *dao.TagDAO
 }
 
-func NewTagService(tagDAO *dao.TagDAO) *TagService {
-	return &TagService{
+// NewService 创建一个新的 TagService
+func NewService(tagDAO *dao.TagDAO) *Service {
+	return &Service{
 		tagDAO: tagDAO,
 	}
 }
 
-func (s *TagService) CreateTag(tag *models.Tag) (*models.Tag, error) {
+// Create 创建一个新的标签
+func (s *Service) Create(tag *models.Tag) (*models.Tag, error) {
 	existingTag, err := s.tagDAO.GetByName(tag.Name)
 	if err == nil && existingTag != nil {
 		return existingTag, nil
@@ -27,7 +30,8 @@ func (s *TagService) CreateTag(tag *models.Tag) (*models.Tag, error) {
 	return tag, nil
 }
 
-func (s *TagService) DeleteTag(id uint) (uint, error) {
+// Delete 删除一个标签
+func (s *Service) Delete(id uint) (uint, error) {
 	// 检查是否有相关联的项
 	relatedItems, err := s.tagDAO.CheckRelatedItems(id)
 	if err != nil {
@@ -43,7 +47,8 @@ func (s *TagService) DeleteTag(id uint) (uint, error) {
 	return id, nil
 }
 
-func (s *TagService) UpdateTag(tag *models.Tag) (*models.Tag, error) {
+// Update 更新一个标签
+func (s *Service) Update(tag *models.Tag) (*models.Tag, error) {
 	existingTag, err := s.tagDAO.GetByID(tag.ID)
 	if err != nil {
 		return nil, err
@@ -63,18 +68,22 @@ func (s *TagService) UpdateTag(tag *models.Tag) (*models.Tag, error) {
 	return existingTag, nil
 }
 
-func (s *TagService) GetTagByID(id uint) (*models.Tag, error) {
+// GetByID 根据ID获取标签
+func (s *Service) GetByID(id uint) (*models.Tag, error) {
 	return s.tagDAO.GetByID(id)
 }
 
-func (s *TagService) GetAllTags() ([]models.Tag, error) {
+// GetAll 获取所有标签
+func (s *Service) GetAll() ([]models.Tag, error) {
 	return s.tagDAO.GetAll()
 }
 
-func (s *TagService) GetTagsByName(name string) ([]models.Tag, error) {
+// GetByName 根据名称获取标签
+func (s *Service) GetByName(name string) ([]models.Tag, error) {
 	return s.tagDAO.GetByNameLike(name)
 }
 
-func (s *TagService) GetTagStats() (map[string]int, error) {
+// GetStats 获取标签统计信息
+func (s *Service) GetStats() (map[string]int, error) {
 	return s.tagDAO.GetTagStats()
 }

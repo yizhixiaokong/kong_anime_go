@@ -4,6 +4,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// Movie 电影模型
 type Movie struct {
 	gorm.Model
 	Name        string     `gorm:"not null"`                    // 名称

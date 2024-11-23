@@ -4,6 +4,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// Anime 动漫模型
 type Anime struct {
 	gorm.Model
 	Name       string     `gorm:"not null"`                    // 名称

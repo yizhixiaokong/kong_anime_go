@@ -4,6 +4,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// Category 分类模型
 type Category struct {
 	gorm.Model
 	Name   string  `gorm:"unique;not null"`

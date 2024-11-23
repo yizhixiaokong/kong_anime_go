@@ -24,23 +24,23 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	router.Use(middleware.CORSMiddleware())
 
 	// Ping
-	pingSrv := pingsrv.NewPingService()
-	pingHandler := ping.NewPingHandler(pingSrv)
+	pingSrv := pingsrv.NewService()
+	pingHandler := ping.NewHandler(pingSrv)
 
 	// Anime
 	animeDAO := dao.NewAnimeDAO(db)
 	categoryDAO := dao.NewCategoryDAO(db)
 	tagDAO := dao.NewTagDAO(db)
-	animeSrv := animesrv.NewAnimeService(animeDAO, categoryDAO, tagDAO)
-	animeHandler := anime.NewAnimeHandler(animeSrv)
+	animeSrv := animesrv.NewService(animeDAO, categoryDAO, tagDAO)
+	animeHandler := anime.NewHandler(animeSrv)
 
 	// Category
-	categorySrv := categorysrv.NewCategoryService(categoryDAO)
-	categoryHandler := category.NewCategoryHandler(categorySrv)
+	categorySrv := categorysrv.NewService(categoryDAO)
+	categoryHandler := category.NewHandler(categorySrv)
 
 	// Tag
-	tagSrv := tagsrv.NewTagService(tagDAO)
-	tagHandler := tag.NewTagHandler(tagSrv)
+	tagSrv := tagsrv.NewService(tagDAO)
+	tagHandler := tag.NewHandler(tagSrv)
 
 	v1 := router.Group("/api/v1")
 	{
@@ -48,36 +48,36 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 		v1.GET("/ping", pingHandler.GetPing)
 
 		// Anime
-		v1.POST("/animes", animeHandler.CreateAnime)
-		v1.DELETE("/animes/:id", animeHandler.DeleteAnime)
-		v1.PUT("/animes/:id", animeHandler.UpdateAnime)
-		v1.GET("/animes/:id", animeHandler.GetAnimeByID)
-		v1.GET("/animes", animeHandler.GetAllAnimes)
-		v1.GET("/animes/search", animeHandler.GetAnimesByName)
-		v1.GET("/animes/season", animeHandler.GetAnimesBySeason)
-		v1.GET("/animes/category", animeHandler.GetAnimesByCategory)
-		v1.GET("/animes/tag", animeHandler.GetAnimesByTag)
+		v1.POST("/animes", animeHandler.Create)
+		v1.DELETE("/animes/:id", animeHandler.Delete)
+		v1.PUT("/animes/:id", animeHandler.Update)
+		v1.GET("/animes/:id", animeHandler.GetByID)
+		v1.GET("/animes", animeHandler.GetAll)
+		v1.GET("/animes/search", animeHandler.GetByName)
+		v1.GET("/animes/season", animeHandler.GetBySeason)
+		v1.GET("/animes/category", animeHandler.GetByCategory)
+		v1.GET("/animes/tag", animeHandler.GetByTag)
 		v1.PATCH("/animes/:id/categories", animeHandler.AddCategoriesToAnime)
 		v1.PATCH("/animes/:id/tags", animeHandler.AddTagsToAnime)
 		v1.GET("/animes/seasons", animeHandler.GetAllSeasons)
 
 		// Category
-		v1.POST("/categories", categoryHandler.CreateCategory)
-		v1.DELETE("/categories/:id", categoryHandler.DeleteCategory)
-		v1.PUT("/categories/:id", categoryHandler.UpdateCategory)
-		v1.GET("/categories/:id", categoryHandler.GetCategoryByID)
-		v1.GET("/categories", categoryHandler.GetAllCategories)
-		v1.GET("/categories/search", categoryHandler.GetCategoriesByName)
-		v1.GET("/categories/stats", categoryHandler.GetCategoryStats)
+		v1.POST("/categories", categoryHandler.Create)
+		v1.DELETE("/categories/:id", categoryHandler.Delete)
+		v1.PUT("/categories/:id", categoryHandler.Update)
+		v1.GET("/categories/:id", categoryHandler.GetByID)
+		v1.GET("/categories", categoryHandler.GetAll)
+		v1.GET("/categories/search", categoryHandler.GetByName)
+		v1.GET("/categories/stats", categoryHandler.GetStats)
 
 		// Tag
-		v1.POST("/tags", tagHandler.CreateTag)
-		v1.DELETE("/tags/:id", tagHandler.DeleteTag)
-		v1.PUT("/tags/:id", tagHandler.UpdateTag)
-		v1.GET("/tags/:id", tagHandler.GetTagByID)
-		v1.GET("/tags", tagHandler.GetAllTags)
-		v1.GET("/tags/search", tagHandler.GetTagsByName)
-		v1.GET("/tags/stats", tagHandler.GetTagStats)
+		v1.POST("/tags", tagHandler.Create)
+		v1.DELETE("/tags/:id", tagHandler.Delete)
+		v1.PUT("/tags/:id", tagHandler.Update)
+		v1.GET("/tags/:id", tagHandler.GetByID)
+		v1.GET("/tags", tagHandler.GetAll)
+		v1.GET("/tags/search", tagHandler.GetByName)
+		v1.GET("/tags/stats", tagHandler.GetStats)
 	}
 
 	return router

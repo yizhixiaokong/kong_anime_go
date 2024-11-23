@@ -6,17 +6,20 @@ import (
 	"kong-anime-go/internal/dao/models"
 )
 
-type CategoryService struct {
+// Service 处理分类相关的服务
+type Service struct {
 	categoryDAO *dao.CategoryDAO
 }
 
-func NewCategoryService(categoryDAO *dao.CategoryDAO) *CategoryService {
-	return &CategoryService{
+// NewService 创建一个新的 CategoryService
+func NewService(categoryDAO *dao.CategoryDAO) *Service {
+	return &Service{
 		categoryDAO: categoryDAO,
 	}
 }
 
-func (s *CategoryService) CreateCategory(category *models.Category) (*models.Category, error) {
+// Create 创建一个新的分类
+func (s *Service) Create(category *models.Category) (*models.Category, error) {
 	existingCategory, err := s.categoryDAO.GetByName(category.Name)
 	if err == nil && existingCategory != nil {
 		return existingCategory, nil
@@ -27,7 +30,8 @@ func (s *CategoryService) CreateCategory(category *models.Category) (*models.Cat
 	return category, nil
 }
 
-func (s *CategoryService) DeleteCategory(id uint) (uint, error) {
+// Delete 删除一个分类
+func (s *Service) Delete(id uint) (uint, error) {
 	// 检查是否有相关联的项
 	relatedItems, err := s.categoryDAO.CheckRelatedItems(id)
 	if err != nil {
@@ -43,7 +47,8 @@ func (s *CategoryService) DeleteCategory(id uint) (uint, error) {
 	return id, nil
 }
 
-func (s *CategoryService) UpdateCategory(category *models.Category) (*models.Category, error) {
+// Update 更新一个分类
+func (s *Service) Update(category *models.Category) (*models.Category, error) {
 	existingCategory, err := s.categoryDAO.GetByID(category.ID)
 	if err != nil {
 		return nil, err
@@ -63,18 +68,22 @@ func (s *CategoryService) UpdateCategory(category *models.Category) (*models.Cat
 	return existingCategory, nil
 }
 
-func (s *CategoryService) GetCategoryByID(id uint) (*models.Category, error) {
+// GetByID 根据ID获取分类
+func (s *Service) GetByID(id uint) (*models.Category, error) {
 	return s.categoryDAO.GetByID(id)
 }
 
-func (s *CategoryService) GetAllCategories() ([]models.Category, error) {
+// GetAll 获取所有分类
+func (s *Service) GetAll() ([]models.Category, error) {
 	return s.categoryDAO.GetAll()
 }
 
-func (s *CategoryService) GetCategoriesByName(name string) ([]models.Category, error) {
+// GetByName 根据名称获取分类
+func (s *Service) GetByName(name string) ([]models.Category, error) {
 	return s.categoryDAO.GetByNameLike(name)
 }
 
-func (s *CategoryService) GetCategoryStats() (map[string]int, error) {
+// GetStats 获取分类统计信息
+func (s *Service) GetStats() (map[string]int, error) {
 	return s.categoryDAO.GetCategoryStats()
 }

@@ -9,23 +9,26 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type CategoryHandler struct {
-	categoryService *category.CategoryService
+// Handler 处理 Category 相关的服务
+type Handler struct {
+	categoryService *category.Service
 }
 
-func NewCategoryHandler(categoryService *category.CategoryService) *CategoryHandler {
-	return &CategoryHandler{
+// NewHandler 创建一个新的 CategoryHandler
+func NewHandler(categoryService *category.Service) *Handler {
+	return &Handler{
 		categoryService: categoryService,
 	}
 }
 
-func (h *CategoryHandler) CreateCategory(c *gin.Context) {
+// Create 创建一个新的分类
+func (h *Handler) Create(c *gin.Context) {
 	var newCategory models.Category
 	if err := c.ShouldBindJSON(&newCategory); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	category, err := h.categoryService.CreateCategory(&newCategory)
+	category, err := h.categoryService.Create(&newCategory)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -33,9 +36,10 @@ func (h *CategoryHandler) CreateCategory(c *gin.Context) {
 	c.JSON(http.StatusOK, category)
 }
 
-func (h *CategoryHandler) DeleteCategory(c *gin.Context) {
+// Delete 删除一个分类
+func (h *Handler) Delete(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
-	deletedID, err := h.categoryService.DeleteCategory(uint(id))
+	deletedID, err := h.categoryService.Delete(uint(id))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -43,7 +47,8 @@ func (h *CategoryHandler) DeleteCategory(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"msg": "Category deleted successfully!", "id": deletedID})
 }
 
-func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
+// Update 更新一个分类
+func (h *Handler) Update(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	var updatedCategory models.Category
 	if err := c.ShouldBindJSON(&updatedCategory); err != nil {
@@ -51,7 +56,7 @@ func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
 		return
 	}
 	updatedCategory.ID = uint(id)
-	category, err := h.categoryService.UpdateCategory(&updatedCategory)
+	category, err := h.categoryService.Update(&updatedCategory)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -59,9 +64,10 @@ func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
 	c.JSON(http.StatusOK, category)
 }
 
-func (h *CategoryHandler) GetCategoryByID(c *gin.Context) {
+// GetByID 根据ID获取分类
+func (h *Handler) GetByID(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
-	category, err := h.categoryService.GetCategoryByID(uint(id))
+	category, err := h.categoryService.GetByID(uint(id))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -69,8 +75,9 @@ func (h *CategoryHandler) GetCategoryByID(c *gin.Context) {
 	c.JSON(http.StatusOK, category)
 }
 
-func (h *CategoryHandler) GetAllCategories(c *gin.Context) {
-	categories, err := h.categoryService.GetAllCategories()
+// GetAll 获取所有分类
+func (h *Handler) GetAll(c *gin.Context) {
+	categories, err := h.categoryService.GetAll()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -78,9 +85,10 @@ func (h *CategoryHandler) GetAllCategories(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"categories": categories, "total": len(categories)})
 }
 
-func (h *CategoryHandler) GetCategoriesByName(c *gin.Context) {
+// GetByName 根据名称获取分类
+func (h *Handler) GetByName(c *gin.Context) {
 	name := c.Query("name")
-	categories, err := h.categoryService.GetCategoriesByName(name)
+	categories, err := h.categoryService.GetByName(name)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -88,8 +96,9 @@ func (h *CategoryHandler) GetCategoriesByName(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"categories": categories, "total": len(categories)})
 }
 
-func (h *CategoryHandler) GetCategoryStats(c *gin.Context) {
-	stats, err := h.categoryService.GetCategoryStats()
+// GetStats 获取分类统计信息
+func (h *Handler) GetStats(c *gin.Context) {
+	stats, err := h.categoryService.GetStats()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

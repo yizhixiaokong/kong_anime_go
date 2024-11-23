@@ -13,11 +13,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// Handler 处理 Anime 相关的服务
 type Handler struct {
-	AnimeSrv *animesrv.AnimeService
+	AnimeSrv *animesrv.Service
 }
 
-func NewAnimeHandler(animeSrv *animesrv.AnimeService) *Handler {
+// NewHandler 创建一个新的 AnimeHandler
+func NewHandler(animeSrv *animesrv.Service) *Handler {
 	return &Handler{
 		AnimeSrv: animeSrv,
 	}
@@ -79,7 +81,8 @@ func (api *Handler) bindAndValidateAnime(c *gin.Context, anime *models.Anime) ([
 	return req.Categories, req.Tags, nil
 }
 
-func (api *Handler) CreateAnime(c *gin.Context) {
+// Create 创建一个新的动漫
+func (api *Handler) Create(c *gin.Context) {
 	anime := &models.Anime{}
 	categories, tags, err := api.bindAndValidateAnime(c, anime)
 	if err != nil {
@@ -87,7 +90,7 @@ func (api *Handler) CreateAnime(c *gin.Context) {
 		return
 	}
 
-	anime, err = api.AnimeSrv.CreateAnime(anime, categories, tags)
+	anime, err = api.AnimeSrv.Create(anime, categories, tags)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -96,10 +99,11 @@ func (api *Handler) CreateAnime(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"msg": "Anime created successfully!", "anime": anime})
 }
 
-func (api *Handler) DeleteAnime(c *gin.Context) {
+// Delete 删除一个动漫
+func (api *Handler) Delete(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 
-	if _, err := api.AnimeSrv.DeleteAnime(uint(id)); err != nil {
+	if _, err := api.AnimeSrv.Delete(uint(id)); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error(), "id": id})
 		return
 	}
@@ -107,7 +111,8 @@ func (api *Handler) DeleteAnime(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"msg": "Anime deleted successfully!", "id": id})
 }
 
-func (api *Handler) UpdateAnime(c *gin.Context) {
+// Update 更新一个动漫
+func (api *Handler) Update(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 
 	anime := &models.Anime{}
@@ -118,7 +123,7 @@ func (api *Handler) UpdateAnime(c *gin.Context) {
 		return
 	}
 
-	anime, err = api.AnimeSrv.UpdateAnime(anime, categories, tags)
+	anime, err = api.AnimeSrv.Update(anime, categories, tags)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -127,10 +132,11 @@ func (api *Handler) UpdateAnime(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"msg": "Anime updated successfully!", "anime": anime})
 }
 
-func (api *Handler) GetAnimeByID(c *gin.Context) {
+// GetByID 根据ID获取动漫
+func (api *Handler) GetByID(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 
-	anime, err := api.AnimeSrv.GetAnimeByID(uint(id))
+	anime, err := api.AnimeSrv.GetByID(uint(id))
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Anime not found"})
 		return
@@ -139,11 +145,12 @@ func (api *Handler) GetAnimeByID(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"anime": anime})
 }
 
-func (api *Handler) GetAllAnimes(c *gin.Context) {
+// GetAll 获取所有动漫
+func (api *Handler) GetAll(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("pageSize", "10"))
 
-	animes, total, err := api.AnimeSrv.GetAllAnimes(page, pageSize)
+	animes, total, err := api.AnimeSrv.GetAll(page, pageSize)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -152,12 +159,13 @@ func (api *Handler) GetAllAnimes(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"animes": animes, "total": total, "page": page, "pageSize": pageSize})
 }
 
-func (api *Handler) GetAnimesByName(c *gin.Context) {
+// GetByName 根据名称获取动漫
+func (api *Handler) GetByName(c *gin.Context) {
 	name := c.Query("name")
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("pageSize", "10"))
 
-	animes, total, err := api.AnimeSrv.GetAnimesByName(name, page, pageSize)
+	animes, total, err := api.AnimeSrv.GetByName(name, page, pageSize)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -166,7 +174,8 @@ func (api *Handler) GetAnimesByName(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"animes": animes, "total": total, "page": page, "pageSize": pageSize})
 }
 
-func (api *Handler) GetAnimesBySeason(c *gin.Context) {
+// GetBySeason 根据季节获取动漫
+func (api *Handler) GetBySeason(c *gin.Context) {
 	season := c.Query("season")
 	formattedSeason, err := formatSeason(season)
 	if err != nil {
@@ -176,7 +185,7 @@ func (api *Handler) GetAnimesBySeason(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("pageSize", "10"))
 
-	animes, total, err := api.AnimeSrv.GetAnimesBySeason(formattedSeason, page, pageSize)
+	animes, total, err := api.AnimeSrv.GetBySeason(formattedSeason, page, pageSize)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -185,12 +194,13 @@ func (api *Handler) GetAnimesBySeason(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"animes": animes, "total": total, "page": page, "pageSize": pageSize})
 }
 
-func (api *Handler) GetAnimesByCategory(c *gin.Context) {
+// GetByCategory 根据分类获取动漫
+func (api *Handler) GetByCategory(c *gin.Context) {
 	categoryName := c.Query("category")
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("pageSize", "10"))
 
-	animes, total, err := api.AnimeSrv.GetAnimesByCategory(categoryName, page, pageSize)
+	animes, total, err := api.AnimeSrv.GetByCategory(categoryName, page, pageSize)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -199,12 +209,13 @@ func (api *Handler) GetAnimesByCategory(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"animes": animes, "total": total, "page": page, "pageSize": pageSize})
 }
 
-func (api *Handler) GetAnimesByTag(c *gin.Context) {
+// GetByTag 根据标签获取动漫
+func (api *Handler) GetByTag(c *gin.Context) {
 	tagName := c.Query("tag")
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("pageSize", "10"))
 
-	animes, total, err := api.AnimeSrv.GetAnimesByTag(tagName, page, pageSize)
+	animes, total, err := api.AnimeSrv.GetByTag(tagName, page, pageSize)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -213,6 +224,7 @@ func (api *Handler) GetAnimesByTag(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"animes": animes, "total": total, "page": page, "pageSize": pageSize})
 }
 
+// AddCategoriesToAnime 添加分类到动漫
 func (api *Handler) AddCategoriesToAnime(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 
@@ -234,6 +246,7 @@ func (api *Handler) AddCategoriesToAnime(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"msg": "Categories added successfully!", "anime": anime})
 }
 
+// AddTagsToAnime 添加标签到动漫
 func (api *Handler) AddTagsToAnime(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 
@@ -255,6 +268,7 @@ func (api *Handler) AddTagsToAnime(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"msg": "Tags added successfully!", "anime": anime})
 }
 
+// GetAllSeasons 获取所有季节
 func (api *Handler) GetAllSeasons(c *gin.Context) {
 	seasons, err := api.AnimeSrv.GetAllSeasons()
 	if err != nil {

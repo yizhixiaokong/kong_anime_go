@@ -7,21 +7,24 @@ import (
 	"strings"
 )
 
-type AnimeService struct {
+// Service 处理动漫相关的服务
+type Service struct {
 	animeDAO    *dao.AnimeDAO
 	categoryDAO *dao.CategoryDAO
 	tagDAO      *dao.TagDAO
 }
 
-func NewAnimeService(animeDAO *dao.AnimeDAO, categoryDAO *dao.CategoryDAO, tagDAO *dao.TagDAO) *AnimeService {
-	return &AnimeService{
+// NewService 创建一个新的 AnimeService
+func NewService(animeDAO *dao.AnimeDAO, categoryDAO *dao.CategoryDAO, tagDAO *dao.TagDAO) *Service {
+	return &Service{
 		animeDAO:    animeDAO,
 		categoryDAO: categoryDAO,
 		tagDAO:      tagDAO,
 	}
 }
 
-func (s *AnimeService) CreateAnime(anime *models.Anime, categories []string, tags []string) (*models.Anime, error) {
+// Create 创建一个新的动漫
+func (s *Service) Create(anime *models.Anime, categories []string, tags []string) (*models.Anime, error) {
 	if err := s.animeDAO.Create(anime); err != nil {
 		return nil, err
 	}
@@ -34,7 +37,8 @@ func (s *AnimeService) CreateAnime(anime *models.Anime, categories []string, tag
 	return s.animeDAO.GetByID(anime.ID)
 }
 
-func (s *AnimeService) DeleteAnime(id uint) (uint, error) {
+// Delete 删除一个动漫
+func (s *Service) Delete(id uint) (uint, error) {
 	if err := s.animeDAO.ClearCategories(id); err != nil {
 		return 0, err
 	}
@@ -45,7 +49,8 @@ func (s *AnimeService) DeleteAnime(id uint) (uint, error) {
 	return id, s.animeDAO.HardDelete(id)
 }
 
-func (s *AnimeService) UpdateAnime(anime *models.Anime, categories []string, tags []string) (*models.Anime, error) {
+// Update 更新一个动漫
+func (s *Service) Update(anime *models.Anime, categories []string, tags []string) (*models.Anime, error) {
 	existingAnime, err := s.animeDAO.GetByID(anime.ID)
 	if err != nil {
 		return nil, err
@@ -75,21 +80,21 @@ func (s *AnimeService) UpdateAnime(anime *models.Anime, categories []string, tag
 	return s.animeDAO.GetByID(existingAnime.ID)
 }
 
-func (s *AnimeService) updateCategories(anime *models.Anime, categories []string) error {
+func (s *Service) updateCategories(anime *models.Anime, categories []string) error {
 	if err := s.animeDAO.ClearCategories(anime.ID); err != nil {
 		return err
 	}
 	return s.addCategoriesToAnime(anime, categories)
 }
 
-func (s *AnimeService) updateTags(anime *models.Anime, tags []string) error {
+func (s *Service) updateTags(anime *models.Anime, tags []string) error {
 	if err := s.animeDAO.ClearTags(anime.ID); err != nil {
 		return err
 	}
 	return s.addTagsToAnime(anime, tags)
 }
 
-func (s *AnimeService) addCategoriesToAnime(anime *models.Anime, categories []string) error {
+func (s *Service) addCategoriesToAnime(anime *models.Anime, categories []string) error {
 	for _, categoryName := range categories {
 		category, err := s.getOrCreateCategory(categoryName)
 		if err != nil {
@@ -102,7 +107,7 @@ func (s *AnimeService) addCategoriesToAnime(anime *models.Anime, categories []st
 	return nil
 }
 
-func (s *AnimeService) addTagsToAnime(anime *models.Anime, tags []string) error {
+func (s *Service) addTagsToAnime(anime *models.Anime, tags []string) error {
 	for _, tagName := range tags {
 		tag, err := s.getOrCreateTag(tagName)
 		if err != nil {
@@ -115,7 +120,7 @@ func (s *AnimeService) addTagsToAnime(anime *models.Anime, tags []string) error 
 	return nil
 }
 
-func (s *AnimeService) getOrCreateCategory(name string) (*models.Category, error) {
+func (s *Service) getOrCreateCategory(name string) (*models.Category, error) {
 	category, err := s.categoryDAO.GetByName(name)
 	if err != nil {
 		category = &models.Category{Name: name}
@@ -126,7 +131,7 @@ func (s *AnimeService) getOrCreateCategory(name string) (*models.Category, error
 	return category, nil
 }
 
-func (s *AnimeService) getOrCreateTag(name string) (*models.Tag, error) {
+func (s *Service) getOrCreateTag(name string) (*models.Tag, error) {
 	tag, err := s.tagDAO.GetByName(name)
 	if err != nil {
 		tag = &models.Tag{Name: name}
@@ -137,31 +142,38 @@ func (s *AnimeService) getOrCreateTag(name string) (*models.Tag, error) {
 	return tag, nil
 }
 
-func (s *AnimeService) GetAnimeByID(id uint) (*models.Anime, error) {
+// GetByID 根据ID获取动漫
+func (s *Service) GetByID(id uint) (*models.Anime, error) {
 	return s.animeDAO.GetByID(id)
 }
 
-func (s *AnimeService) GetAllAnimes(page, pageSize int) ([]models.Anime, int64, error) {
+// GetAll 获取所有动漫
+func (s *Service) GetAll(page, pageSize int) ([]models.Anime, int64, error) {
 	return s.animeDAO.GetAllPaginated(page, pageSize)
 }
 
-func (s *AnimeService) GetAnimesByName(name string, page, pageSize int) ([]models.Anime, int64, error) {
+// GetByName 根据名称获取动漫
+func (s *Service) GetByName(name string, page, pageSize int) ([]models.Anime, int64, error) {
 	return s.animeDAO.GetByNameAndAlias(name, page, pageSize)
 }
 
-func (s *AnimeService) GetAnimesBySeason(season string, page, pageSize int) ([]models.Anime, int64, error) {
+// GetBySeason 根据季节获取动漫
+func (s *Service) GetBySeason(season string, page, pageSize int) ([]models.Anime, int64, error) {
 	return s.animeDAO.GetBySeason(season, page, pageSize)
 }
 
-func (s *AnimeService) GetAnimesByCategory(categoryName string, page, pageSize int) ([]models.Anime, int64, error) {
+// GetByCategory 根据分类获取动漫
+func (s *Service) GetByCategory(categoryName string, page, pageSize int) ([]models.Anime, int64, error) {
 	return s.animeDAO.GetByCategory(categoryName, page, pageSize)
 }
 
-func (s *AnimeService) GetAnimesByTag(tagName string, page, pageSize int) ([]models.Anime, int64, error) {
+// GetByTag 根据标签获取动漫
+func (s *Service) GetByTag(tagName string, page, pageSize int) ([]models.Anime, int64, error) {
 	return s.animeDAO.GetByTag(tagName, page, pageSize)
 }
 
-func (s *AnimeService) AddCategoriesToAnime(animeID uint, categories []string) (*models.Anime, error) {
+// AddCategoriesToAnime 添加分类到动漫
+func (s *Service) AddCategoriesToAnime(animeID uint, categories []string) (*models.Anime, error) {
 	anime, err := s.animeDAO.GetByID(animeID)
 	if err != nil {
 		return nil, err
@@ -172,7 +184,8 @@ func (s *AnimeService) AddCategoriesToAnime(animeID uint, categories []string) (
 	return s.animeDAO.GetByID(anime.ID)
 }
 
-func (s *AnimeService) AddTagsToAnime(animeID uint, tags []string) (*models.Anime, error) {
+// AddTagsToAnime 添加标签到动漫
+func (s *Service) AddTagsToAnime(animeID uint, tags []string) (*models.Anime, error) {
 	anime, err := s.animeDAO.GetByID(animeID)
 	if err != nil {
 		return nil, err
@@ -183,7 +196,8 @@ func (s *AnimeService) AddTagsToAnime(animeID uint, tags []string) (*models.Anim
 	return s.animeDAO.GetByID(anime.ID)
 }
 
-func (s *AnimeService) GetAllSeasons() (map[string]map[string]int, error) {
+// GetAllSeasons 获取所有季节
+func (s *Service) GetAllSeasons() (map[string]map[string]int, error) {
 	seasons, err := s.animeDAO.GetAllSeasons()
 	if err != nil {
 		return nil, err

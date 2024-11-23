@@ -9,23 +9,26 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type TagHandler struct {
-	tagService *tag.TagService
+// Handler 处理 Tag 相关的服务
+type Handler struct {
+	tagService *tag.Service
 }
 
-func NewTagHandler(tagService *tag.TagService) *TagHandler {
-	return &TagHandler{
+// NewHandler 创建一个新的 TagHandler
+func NewHandler(tagService *tag.Service) *Handler {
+	return &Handler{
 		tagService: tagService,
 	}
 }
 
-func (h *TagHandler) CreateTag(c *gin.Context) {
+// Create 创建一个新的标签
+func (h *Handler) Create(c *gin.Context) {
 	var newTag models.Tag
 	if err := c.ShouldBindJSON(&newTag); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	tag, err := h.tagService.CreateTag(&newTag)
+	tag, err := h.tagService.Create(&newTag)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -33,9 +36,10 @@ func (h *TagHandler) CreateTag(c *gin.Context) {
 	c.JSON(http.StatusOK, tag)
 }
 
-func (h *TagHandler) DeleteTag(c *gin.Context) {
+// Delete 删除一个标签
+func (h *Handler) Delete(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
-	deletedID, err := h.tagService.DeleteTag(uint(id))
+	deletedID, err := h.tagService.Delete(uint(id))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -43,7 +47,8 @@ func (h *TagHandler) DeleteTag(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"msg": "Tag deleted successfully!", "id": deletedID})
 }
 
-func (h *TagHandler) UpdateTag(c *gin.Context) {
+// Update 更新一个标签
+func (h *Handler) Update(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	var updatedTag models.Tag
 	if err := c.ShouldBindJSON(&updatedTag); err != nil {
@@ -51,7 +56,7 @@ func (h *TagHandler) UpdateTag(c *gin.Context) {
 		return
 	}
 	updatedTag.ID = uint(id)
-	tag, err := h.tagService.UpdateTag(&updatedTag)
+	tag, err := h.tagService.Update(&updatedTag)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -59,9 +64,10 @@ func (h *TagHandler) UpdateTag(c *gin.Context) {
 	c.JSON(http.StatusOK, tag)
 }
 
-func (h *TagHandler) GetTagByID(c *gin.Context) {
+// GetByID 根据ID获取标签
+func (h *Handler) GetByID(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
-	tag, err := h.tagService.GetTagByID(uint(id))
+	tag, err := h.tagService.GetByID(uint(id))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -69,8 +75,9 @@ func (h *TagHandler) GetTagByID(c *gin.Context) {
 	c.JSON(http.StatusOK, tag)
 }
 
-func (h *TagHandler) GetAllTags(c *gin.Context) {
-	tags, err := h.tagService.GetAllTags()
+// GetAll 获取所有标签
+func (h *Handler) GetAll(c *gin.Context) {
+	tags, err := h.tagService.GetAll()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -78,9 +85,10 @@ func (h *TagHandler) GetAllTags(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"tags": tags, "total": len(tags)})
 }
 
-func (h *TagHandler) GetTagsByName(c *gin.Context) {
+// GetByName 根据名称获取标签
+func (h *Handler) GetByName(c *gin.Context) {
 	name := c.Query("name")
-	tags, err := h.tagService.GetTagsByName(name)
+	tags, err := h.tagService.GetByName(name)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -88,8 +96,9 @@ func (h *TagHandler) GetTagsByName(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"tags": tags, "total": len(tags)})
 }
 
-func (h *TagHandler) GetTagStats(c *gin.Context) {
-	stats, err := h.tagService.GetTagStats()
+// GetStats 获取标签统计信息
+func (h *Handler) GetStats(c *gin.Context) {
+	stats, err := h.tagService.GetStats()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
