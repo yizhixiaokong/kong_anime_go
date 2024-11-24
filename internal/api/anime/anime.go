@@ -102,8 +102,9 @@ func (api *Handler) Create(c *gin.Context) {
 // Delete 删除一个动漫
 func (api *Handler) Delete(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
+	force, _ := strconv.ParseBool(c.DefaultQuery("force", "false"))
 
-	if _, err := api.AnimeSrv.Delete(uint(id)); err != nil {
+	if _, err := api.AnimeSrv.Delete(uint(id), force); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error(), "id": id})
 		return
 	}
@@ -132,7 +133,7 @@ func (api *Handler) Update(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"msg": "Anime updated successfully!", "anime": anime})
 }
 
-// GetByID 根据ID获取动漫
+// GetByID ��据ID获取动漫
 func (api *Handler) GetByID(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 

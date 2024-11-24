@@ -83,7 +83,7 @@ func (dao *AnimeDAO) ClearCategories(animeID uint) error {
 	return dao.clearAssociations(animeID, "Categories")
 }
 
-// ClearTags 清除动漫的所��标签
+// ClearTags 清除动漫的所有标签
 func (dao *AnimeDAO) ClearTags(animeID uint) error {
 	return dao.clearAssociations(animeID, "Tags")
 }
@@ -120,6 +120,13 @@ func (dao *AnimeDAO) GetAllSeasons() ([]SeasonCount, error) {
 		Order("season").
 		Scan(&seasons).Error
 	return seasons, err
+}
+
+func (dao *AnimeDAO) GetFollowsByAnimeID(animeID uint) ([]models.Follow, int64, error) {
+	var follows []models.Follow
+	var total int64
+	err := dao.db.Where("anime_id = ?", animeID).Find(&follows).Count(&total).Error
+	return follows, total, err
 }
 
 func (dao *AnimeDAO) getByCondition(condition string, args []any, page, pageSize int) ([]models.Anime, int64, error) {

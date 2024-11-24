@@ -12,14 +12,16 @@ type Service struct {
 	animeDAO    *dao.AnimeDAO
 	categoryDAO *dao.CategoryDAO
 	tagDAO      *dao.TagDAO
+	followDAO   *dao.FollowDAO
 }
 
 // NewService 创建一个新的 AnimeService
-func NewService(animeDAO *dao.AnimeDAO, categoryDAO *dao.CategoryDAO, tagDAO *dao.TagDAO) *Service {
+func NewService(animeDAO *dao.AnimeDAO, categoryDAO *dao.CategoryDAO, tagDAO *dao.TagDAO, followDAO *dao.FollowDAO) *Service {
 	return &Service{
 		animeDAO:    animeDAO,
 		categoryDAO: categoryDAO,
 		tagDAO:      tagDAO,
+		followDAO:   followDAO,
 	}
 }
 
@@ -38,7 +40,20 @@ func (s *Service) Create(anime *models.Anime, categories []string, tags []string
 }
 
 // Delete 删除一个动漫
-func (s *Service) Delete(id uint) (uint, error) {
+func (s *Service) Delete(id uint, force bool) (uint, error) {
+	if force {
+		if err := s.followDAO.HardDeleteByAnimeID(id); err != nil {
+			return 0, err
+		}
+	} else {
+		follow, err := s.followDAO.GetByAnimeID(id)
+		if err != nil {
+			return 0, err
+		}
+		if follow != nil {
+			return 0, errors.New("cannot delete anime with associated follow")
+		}
+	}
 	if err := s.animeDAO.ClearCategories(id); err != nil {
 		return 0, err
 	}

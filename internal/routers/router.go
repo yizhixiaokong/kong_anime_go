@@ -3,15 +3,17 @@ package routers
 import (
 	"kong-anime-go/internal/api/anime"
 	"kong-anime-go/internal/api/category"
+	"kong-anime-go/internal/api/follow" // 添加追番API的导入
 	"kong-anime-go/internal/api/ping"
 	"kong-anime-go/internal/api/tag"
 	"kong-anime-go/internal/dao"
 	animesrv "kong-anime-go/internal/services/anime"
 	categorysrv "kong-anime-go/internal/services/category"
+	followsrv "kong-anime-go/internal/services/follow" // 添加追番服务的导入
 	pingsrv "kong-anime-go/internal/services/ping"
 	tagsrv "kong-anime-go/internal/services/tag"
 
-	"kong-anime-go/internal/middleware" // 添加跨域中间件的导入
+	"kong-anime-go/internal/middleware"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -20,7 +22,6 @@ import (
 func SetupRouter(db *gorm.DB) *gin.Engine {
 	router := gin.Default()
 
-	// 添加跨域中间件
 	router.Use(middleware.CORSMiddleware())
 
 	// Ping
@@ -31,7 +32,8 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	animeDAO := dao.NewAnimeDAO(db)
 	categoryDAO := dao.NewCategoryDAO(db)
 	tagDAO := dao.NewTagDAO(db)
-	animeSrv := animesrv.NewService(animeDAO, categoryDAO, tagDAO)
+	followDAO := dao.NewFollowDAO(db)
+	animeSrv := animesrv.NewService(animeDAO, categoryDAO, tagDAO, followDAO)
 	animeHandler := anime.NewHandler(animeSrv)
 
 	// Category
@@ -41,6 +43,10 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	// Tag
 	tagSrv := tagsrv.NewService(tagDAO)
 	tagHandler := tag.NewHandler(tagSrv)
+
+	// Follow
+	followSrv := followsrv.NewService(followDAO, animeDAO)
+	followHandler := follow.NewHandler(followSrv)
 
 	v1 := router.Group("/api/v1")
 	{
@@ -78,6 +84,15 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 		v1.GET("/tags", tagHandler.GetAll)
 		v1.GET("/tags/search", tagHandler.GetByName)
 		v1.GET("/tags/stats", tagHandler.GetStats)
+
+		// Follow
+		v1.POST("/follows", followHandler.Create)
+		v1.DELETE("/follows/:id", followHandler.Delete)
+		v1.PUT("/follows/:id", followHandler.Update)
+		v1.GET("/follows/:id", followHandler.GetByID)
+		v1.GET("/follows", followHandler.GetAll)
+		v1.PATCH("/follows/:id/status", followHandler.UpdateStatus)
+		v1.GET("/follows/categories", followHandler.GetAllCategories)
 	}
 
 	return router

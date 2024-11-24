@@ -8,5 +8,5 @@ import (
 
 // Migrate 迁移数据库
 func Migrate(db *gorm.DB) error {
-	return db.AutoMigrate(&models.Anime{}, &models.Category{}, &models.Tag{}, &models.Movie{})
+	return db.AutoMigrate(&models.Anime{}, &models.Category{}, &models.Tag{}, &models.Movie{}, &models.Follow{})
 }
