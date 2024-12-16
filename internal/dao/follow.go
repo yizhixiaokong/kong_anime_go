@@ -54,11 +54,11 @@ func (dao *FollowDAO) GetByAnimeID(animeID uint) (*models.Follow, error) {
 }
 
 // GetAllPaginated 获取分页的追番列表
-func (dao *FollowDAO) GetAllPaginated(page, pageSize int, category int, status int) ([]models.Follow, int64, error) {
+func (dao *FollowDAO) GetAllPaginated(page, pageSize int, category int, status int, name *string, sorter *string) ([]models.Follow, int64, error) {
 	var follows []models.Follow
 	var total int64
 	offset := (page - 1) * pageSize
-	query := dao.db.Preload("Anime").Order("id DESC").Limit(pageSize).Offset(offset)
+	query := dao.db.Preload("Anime").Limit(pageSize).Offset(offset)
 	countQuery := dao.db.Model(&models.Follow{})
 	if category != -1 {
 		query = query.Where("category = ?", category)
@@ -67,6 +67,18 @@ func (dao *FollowDAO) GetAllPaginated(page, pageSize int, category int, status i
 	if status != -1 {
 		query = query.Where("status = ?", status)
 		countQuery = countQuery.Where("status = ?", status)
+	}
+	query = query.Joins("JOIN animes ON animes.id = follows.anime_id")
+	countQuery = countQuery.Joins("JOIN animes ON animes.id = follows.anime_id")
+
+	if name != nil && *name != "" {
+		query = query.Where("animes.name LIKE ?", "%"+*name+"%")
+		countQuery = countQuery.Where("animes.name LIKE ?", "%"+*name+"%")
+	}
+	if sorter != nil && *sorter != "" {
+		query = query.Order(*sorter)
+	} else {
+		query = query.Order("id DESC")
 	}
 	err := query.Find(&follows).Error
 	countQuery.Count(&total)

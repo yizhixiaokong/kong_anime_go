@@ -116,6 +116,15 @@ func (h *Handler) GetAll(c *gin.Context) {
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("pageSize", "10"))
 	categoryStr := c.DefaultQuery("category", "")
 	statusStr := c.DefaultQuery("status", "")
+	name := c.DefaultQuery("name", "")
+	sorter := c.DefaultQuery("sorter", "")
+
+	// 验证 sorter 参数，只允许 "asc" 或 "desc"
+	if sorter != "" && sorter != "asc" && sorter != "desc" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid sorter"})
+		return
+	}
+
 	var category, status *int
 	if categoryStr != "" {
 		categoryVal, _ := strconv.Atoi(categoryStr)
@@ -125,7 +134,19 @@ func (h *Handler) GetAll(c *gin.Context) {
 		statusVal, _ := strconv.Atoi(statusStr)
 		status = &statusVal
 	}
-	follows, total, err := h.service.GetAll(page, pageSize, category, status)
+
+	// 根据 sorter 参数设置排序字段
+	var sortField *string
+	if sorter != "" {
+		sortField = new(string)
+		if sorter == "asc" {
+			*sortField = "animes.name ASC"
+		} else {
+			*sortField = "animes.name DESC"
+		}
+	}
+
+	follows, total, err := h.service.GetAll(page, pageSize, category, status, &name, sortField)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

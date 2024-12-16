@@ -79,7 +79,7 @@ func (s *Service) GetByAnimeID(animeID uint) (*models.Follow, error) {
 }
 
 // GetAll 获取所有追番
-func (s *Service) GetAll(page, pageSize int, category *int, status *int) ([]models.Follow, int64, error) {
+func (s *Service) GetAll(page, pageSize int, category *int, status *int, name *string, sorter *string) ([]models.Follow, int64, error) {
 	var categoryInt, statusInt int
 	if category != nil {
 		categoryInt = *category
@@ -91,5 +91,5 @@ func (s *Service) GetAll(page, pageSize int, category *int, status *int) ([]mode
 	} else {
 		statusInt = -1
 	}
-	return s.followDAO.GetAllPaginated(page, pageSize, categoryInt, statusInt)
+	return s.followDAO.GetAllPaginated(page, pageSize, categoryInt, statusInt, name, sorter)
 }
